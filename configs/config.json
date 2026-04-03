@@ -1,0 +1,8 @@
+{
+    "jsonpath":"$.config",
+    "model_path":"./model",
+    "enAI":true
+
+    
+
+}
