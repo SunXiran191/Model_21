@@ -20,8 +20,8 @@ public:
     LIGHT_LOST = 5,
     };
     LightFlag flag_light;
-    void check_light(const std::vector<DetectionTarget>& predict_result);
-    void run_light(const void* src_img, const std::vector<DetectionTarget>& predict_result);
+    void check_light(const std::vector<PredictResult>& predict_result);
+    void run_light(const void* src_img, const std::vector<PredictResult>& predict_result);
 
     
 };
