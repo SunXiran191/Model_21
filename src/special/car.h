@@ -17,8 +17,8 @@ public:
     CAR_AVOID = 1,
     CAR_LOST = 2,
 };
-    void check_car(const std::vector<DetectionTarget>& predict_result);
-    void run_car(const void* src_img, const std::vector<DetectionTarget>& predict_result);
+    void check_car(const std::vector<PredictResult>& predict_result);
+    void run_car(const void* src_img, const std::vector<PredictResult>& predict_result);
 
     CarFlag flag_car;
 

@@ -15,8 +15,8 @@ public:
     GOLD_GET = 1,
     GOLD_LOST = 2,
 };
-    void check_gold(const std::vector<DetectionTarget>& predict_result);
-    void run_gold(const void* src_img, const std::vector<DetectionTarget>& predict_result);
+    void check_gold(const std::vector<PredictResult>& predict_result);
+    void run_gold(const void* src_img, const std::vector<PredictResult>& predict_result);
 
     GoldFlag flag_gold;
 };

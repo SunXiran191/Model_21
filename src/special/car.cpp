@@ -2,14 +2,22 @@
 
 
 
+
+using namespace std;
+using namespace cv;
+
 Car::Car(){}
 
+Car::Car(Config &config){
 
-void Car::check_car(const std::vector<DetectionTarget>& predict_result) {
+}
+
+
+void Car::check_car(const std::vector<PredictResult>& predict_result) {
     bool is_car_detected = false;
 
     for (const auto& target : predict_result) {
-        if (target.class_id == CLASS_ID_CAR) {
+        if (target.class_id == car) {
             is_car_detected = true;
             break;
         }
@@ -26,7 +34,7 @@ void Car::check_car(const std::vector<DetectionTarget>& predict_result) {
     }
 }
 
-void Car::run_car(const void* src_img, const std::vector<DetectionTarget>& predict_result) {
+void Car::run_car(const void* src_img, const std::vector<PredictResult>& predict_result) {
     (void)src_img;
     (void)predict_result;
 }
