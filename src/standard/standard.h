@@ -19,6 +19,18 @@ struct TaskData {
     float angle = 0.0f;
 };
 
+class Scene {
+public:
+    bool GoldScene;
+    bool CarScene;
+    bool HumanScene;
+    bool LightScene;
+
+    Scene();
+    bool all();
+    bool none();
+    };
+
 class Standard {
 public:
     Standard();
@@ -29,14 +41,22 @@ public:
     TRACK_AI_MIDDLE = 1;
     };
     TrackState trackstate = TrackState::TRACK_MIDDLE;
-    enum Scene {
-    Normal = 0;
-    Gold = 1;
-    Car = 2;
-    Human = 3;
-    Light = 4;
+    Gold gold_;
+    Car car_;
+    Human human_;
+    Light light_;
+
+    enum Scene_status {
+    Normal_status = 0;
+    Gold_status = 1;
+    Car_status = 2;
+    Human_status = 3;
+    Light_status = 4;
     };
-    Scene scene = Scene::Normal;
+
+
+    Scene_status scene_status = Scene_status::Normal_status;
+
 
     TaskData run(const cv::Mat& src_img, const std::vector<DetectionTarget>& predict_result,
                  double pitch_angle);
