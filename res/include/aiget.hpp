@@ -12,8 +12,8 @@
 
 using json = nlohmann::json;
 
-
-
+class aiget{
+public:
 struct PredictResult {
     int x1; //左上角
     int y1;
@@ -151,3 +151,4 @@ inline std::vector<float> result_get(const std::string& expected_ip, int expecte
     return result;
 }
 
+};
