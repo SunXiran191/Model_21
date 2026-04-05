@@ -207,8 +207,24 @@ vector<Point> LineTracker::FitTrajectory_GPR(int point_count, const vector<Point
     return curve_pts;
 }
 
+// 二次贝塞尔曲线
+vector<POINT> LineTracker::FitTrajectory_Bezier_2d(POINT p0, POINT p1, POINT p2, int num_points)
+{
+    std::vector<POINT> curve;
+    for (int i = 0; i <= num_points; ++i)
+    {
+        float t = (float)i / (float)num_points;
+        float u = 1.0f - t;
+        POINT p;
+        // 贝塞尔曲线公式: B(t) = (1-t)^2 * P0 + 2t(1-t) * P1 + t^2 * P2
+        p.x = static_cast<int>(u * u * p0.x + 2 * u * t * p1.x + t * t * p2.x);
+        p.y = static_cast<int>(u * u * p0.y + 2 * u * t * p1.y + t * t * p2.y);
+        curve.push_back(p);
+    }
+    return curve;
+}
+
 // 分段贝塞尔曲线
-//  感觉不能用，很难排除噪点/极端点
 vector<Point> LineTracker::FitTrajectory_Bezier(int point_count, const vector<Point> &lane_points)
 {
     vector<Point> output;
