@@ -4,7 +4,7 @@
 #include <numeric>
 
 // 简单的多项式拟合实现（最小二乘法）
-vector<Point> LineTracker::FitTrajectory_LSM(const vector<Point> &pts, Mat &frame)
+vector<Point> FitTrajectory_LSM(const vector<Point> &pts, Mat &frame)
 {
     vector<Point> curve_pts;
     if (pts.size() < 3)
@@ -48,7 +48,7 @@ vector<Point> LineTracker::FitTrajectory_LSM(const vector<Point> &pts, Mat &fram
 }
 
 // lowess局部加权回归拟合，适合处理噪点较多的情况，计算量较大
-vector<Point> LineTracker::FitTrajectory_LOWESS(int point_count, const vector<Point> &pts, Mat &frame)
+vector<Point> FitTrajectory_LOWESS(int point_count, const vector<Point> &pts, Mat &frame)
 {
     vector<Point> curve_pts;
     int n = pts.size();
@@ -99,7 +99,7 @@ vector<Point> LineTracker::FitTrajectory_LOWESS(int point_count, const vector<Po
 }
 
 // 多项式拟合，计算量小但对噪点敏感
-vector<Point> LineTracker::FitTrajectory_Poly(int point_count, const vector<Point> &pts, Mat &frame)
+vector<Point> FitTrajectory_Poly(int point_count, const vector<Point> &pts, Mat &frame)
 {
     vector<Point> curve_pts;
     int n = pts.size();
@@ -150,7 +150,7 @@ vector<Point> LineTracker::FitTrajectory_Poly(int point_count, const vector<Poin
 }
 
 // 高斯过程回归，适合处理复杂曲线，计算量较大
-vector<Point> LineTracker::FitTrajectory_GPR(int point_count, const vector<Point> &pts, Mat &frame)
+vector<Point> FitTrajectory_GPR(int point_count, const vector<Point> &pts, Mat &frame)
 {
     vector<Point> curve_pts;
     int n = pts.size();
@@ -208,7 +208,7 @@ vector<Point> LineTracker::FitTrajectory_GPR(int point_count, const vector<Point
 }
 
 // 二次贝塞尔曲线
-vector<POINT> LineTracker::FitTrajectory_Bezier_2d(POINT p0, POINT p1, POINT p2, int num_points)
+vector<POINT> FitTrajectory_Bezier_2d(POINT p0, POINT p1, POINT p2, int num_points)
 {
     std::vector<POINT> curve;
     for (int i = 0; i <= num_points; ++i)
@@ -225,7 +225,7 @@ vector<POINT> LineTracker::FitTrajectory_Bezier_2d(POINT p0, POINT p1, POINT p2,
 }
 
 // 分段贝塞尔曲线
-vector<Point> LineTracker::FitTrajectory_Bezier(int point_count, const vector<Point> &lane_points)
+vector<Point> FitTrajectory_Bezier(int point_count, const vector<Point> &lane_points)
 {
     vector<Point> output;
     // 点数不足时直接返回原始点
@@ -303,4 +303,21 @@ vector<Point> LineTracker::FitTrajectory_Bezier(int point_count, const vector<Po
     }
 
     return output;
+}
+
+// 二次贝塞尔曲线
+vector<Point> FitTrajectory_Bezier_2d(Point p0, Point p1, Point p2, int num_points)
+{
+    vector<Point> curve;
+    for (int i = 0; i <= num_points; ++i)
+    {
+        float t = (float)i / (float)num_points;
+        float u = 1.0f - t;
+        Point p;
+        // 贝塞尔曲线公式: B(t) = (1-t)^2 * P0 + 2t(1-t) * P1 + t^2 * P2
+        p.x = static_cast<int>(u * u * p0.x + 2 * u * t * p1.x + t * t * p2.x);
+        p.y = static_cast<int>(u * u * p0.y + 2 * u * t * p1.y + t * t * p2.y);
+        curve.push_back(p);
+    }
+    return curve;
 }

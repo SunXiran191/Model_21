@@ -14,9 +14,7 @@ struct Config{
     float speedHigh = 1.5f;
     float speedavoid = 0.8f;
 
+    float confidence_threshold = 0.85 // 添加这一行
 
-
-NLOHMANN_DEFINE_TYPE_INTRUSIVE(Config, jsonPth,wifi_start,ttyUsb, en_show, en_AI_show,speedLow, speedHigh, speedavoid
-                                        );
-
-}
+    NLOHMANN_DEFINE_TYPE_INTRUSIVE(Config, jsonPth, wifi_start, ttyUsb, en_show, en_AI_show, speedLow, speedHigh, speedavoid, confidence_threshold
+};

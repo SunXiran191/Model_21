@@ -3,8 +3,21 @@
 using namespace cv;
 using namespace std;
 
-int clamp(int val, int min_val, int max_val) {
-    return max(min_val, min(val, max_val));
+int clip(int x, int low, int up)
+{
+    return x > up ? up : x < low ? low : x;
+}
+
+float clipf(float x, float low, float up)
+{
+    return x > up ? up : x < low ? low : x;
+}
+
+void swap(int *a, int *b)
+{
+    int temp = *a;
+    *a = *b;
+    *b = temp;
 }
 
 int factorial(int x)

@@ -1,7 +1,12 @@
 {
-    "jsonpath":"$.config",
-    "model_path":"./model",
-    "enAI":true
+    "jsonpath": "$.config",
+    "model_path": "./model",
+    "enAI": true,
+    "enAI_show": true,
+    "speedLow": 0.8,
+    "speedHigh": 1.5,
+    "speedavoid": 0.8,
+    "confidence_threshold": 0.5
 
     
 
