@@ -1,0 +1,19 @@
+./../../Desktop/setupUI/dist/setup_webui
+
+./../../Desktop/setup_1.0.8k/setupUI1.0.8K/dist/setup_webui
+
+
+
+cd src/inference/ppseg/ 
+python infer.py
+
+
+cd build/
+./icar
+
+
+cd ..
+cmake --build build -j4
+
+
+shutdown -h now

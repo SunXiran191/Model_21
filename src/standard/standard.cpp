@@ -55,6 +55,25 @@ Standard::Standard(const Config *config)
                       << ", use default enAI=false\n";
         }
     }
+
+    gold_.GOLD_DIST_FORWARD = config_.GOLD_DIST_FORWARD;
+    gold_.GOLD_DIST_BACKWARD = config_.GOLD_DIST_BACKWARD;
+    car_.CAR_DIST_FORWARD = config_.CAR_DIST_FORWARD;
+    car_.CAR_DIST_BACKWARD = config_.CAR_DIST_BACKWARD;
+    human_.HUMAN_DIST_FORWARD = config_.HUMAN_DIST_FORWARD;
+    human_.HUMAN_DIST_BACKWARD = config_.HUMAN_DIST_BACKWARD;
+
+    gold_.GOLD_FIND_FRAMES_THRESH = config_.GOLD_FIND_FRAMES_THRESH;
+    gold_.GOLD_LOST_FRAMES_THRESH = config_.GOLD_LOST_FRAMES_THRESH;
+    car_.CAR_FIND_FRAMES_THRESH = config_.CAR_FIND_FRAMES_THRESH;
+    car_.CAR_LOST_FRAMES_THRESH = config_.CAR_LOST_FRAMES_THRESH;
+    human_.HUMAN_FIND_FRAMES_THRESH = config_.HUMAN_FIND_FRAMES_THRESH;
+    human_.HUMAN_LOST_FRAMES_THRESH = config_.HUMAN_LOST_FRAMES_THRESH;
+
+    gold_.confidence_threshold = config_.confidence_threshold;
+    car_.confidence_threshold = config_.confidence_threshold;
+    human_.confidence_threshold = config_.confidence_threshold;
+    light_.confidence_threshold = config_.confidence_threshold;
 }
 
 TaskData Standard::run(const cv::Mat &src_img,
@@ -67,14 +86,14 @@ TaskData Standard::run(const cv::Mat &src_img,
     (void)pitch_angle;
     int obj_count = 0;
     (void)obj_count;
-    /********************************** Í¼Ïñ´¦Àí ***********************************/
+    /********************************** å›¾åƒå¤„ç† ***********************************/
 
-    /******************************* AI¼ì²â×´Ì¬¸üĞÂ ********************************/
+    /******************************* AIæ£€æµ‹çŠ¶æ€æ›´æ–° ********************************/
 
     updateSceneStatus(frame, scene_status, config_);
     const bool enAI = (config_ != nullptr) ? config_->enAI : false;
 
-    /********************************** ÔªËØÅĞ¶Ï ***********************************/
+    /********************************** å…ƒç´ åˆ¤æ–­ ***********************************/
 
     if (scene_status == Scene_status::Normal && enAI)
     {
@@ -156,7 +175,7 @@ TaskData Standard::run(const cv::Mat &src_img,
         }
     }
 
-    /********************************** cv´«Í³Ñ²Ïß ***********************************/
+    /********************************** cvä¼ ç»Ÿå·¡çº¿ ***********************************/
 
     std::vector<cv::Point> lane_points = tracker.ExtractArrows(frame, mask);
 
@@ -175,7 +194,7 @@ TaskData Standard::run(const cv::Mat &src_img,
             LineTracker::ExtractArrows(src_img, debug_mask);
         }
 
-        /********************************** Í¸ÊÓ±ä»» ***********************************/
+        /********************************** é€è§†å˜æ¢ ***********************************/
         t_trackPoints_CV.clear();
         for (int i = 0; i < trackPoints_CV.size(); i++)
         {
@@ -187,11 +206,11 @@ TaskData Standard::run(const cv::Mat &src_img,
         }
         int t_trackPoints_CV_size = t_trackPoints_CV.size();
 
-        /********************************** ÆğÊ¼µãÖØ²ÉÑù ***********************************/
+        /********************************** èµ·å§‹ç‚¹é‡é‡‡æ · ***********************************/
 
         if (t_trackPoints_CV.size() > 3)
         {
-            // ³õÊ¼»¯ s_t_trackPoints_CV ´Ó trackPoints_CV
+            // åˆå§‹åŒ– s_t_trackPoints_CV ä» trackPoints_CV
             s_t_trackPoints_CV.clear();
             for (const auto &pt : t_trackPoints_CV)
             {
@@ -201,13 +220,13 @@ TaskData Standard::run(const cv::Mat &src_img,
 
             float min_dist = 10000000;
             int begin_id = -1;
-            bool center_effective_flag = false; // ÖĞÏßÓĞĞ§±êÖ¾
+            bool center_effective_flag = false; // ä¸­çº¿æœ‰æ•ˆæ ‡å¿—
 
             cv::Point2f car_base_ipm = general.transf(COLSIMAGE / 2.0f, ROWSIMAGE * 0.95f);
             float cx = car_base_ipm.x;
             float cy = car_base_ipm.y;
 
-            // ÕÒ×î½üµã(ÆğÊ¼µãÖĞÏß¹éÒ»»¯)
+            // æ‰¾æœ€è¿‘ç‚¹(èµ·å§‹ç‚¹ä¸­çº¿å½’ä¸€åŒ–)
             for (int i = 0; i < s_t_trackPoints_CV_size; i++)
             {
                 float dx = s_t_trackPoints_CV[i].x - cx;
@@ -222,7 +241,7 @@ TaskData Standard::run(const cv::Mat &src_img,
 
             begin_id = general.clip(begin_id, 0, s_t_trackPoints_CV_size - 1);
 
-            /********************************** µÈ¾à²ÉÑù ***********************************/
+            /********************************** ç­‰è·é‡‡æ · ***********************************/
 
             std::vector<POINT> temp_center;
             int temp_center_size;
@@ -245,7 +264,7 @@ TaskData Standard::run(const cv::Mat &src_img,
                 resample_points(temp_center, temp_center_size, s_t_trackPoints_CV,
                                 s_t_trackPoints_CV_size, SAMPLE_DIST * pixel_per_meter);
 
-                /********************************** Æ«²î¼ÆËã ***********************************/
+                /********************************** åå·®è®¡ç®— ***********************************/
                 double min_dis = 1000000;
 
                 for (int i = 1; i < s_t_trackPoints_CV_size; i++)
@@ -275,22 +294,22 @@ TaskData Standard::run(const cv::Mat &src_img,
                 assert(!isnan(error));
                 printf("far_dx:%f,far_dy %f\n", dx, dy);
                 printf("cx %f cy %f\n", cx, cy);
-                printf("error_far: %f degrees\n", error); // Ìí¼Ó´òÓ¡Æ«²î½Ç
+                printf("error_far: %f degrees\n", error); // æ·»åŠ æ‰“å°åå·®è§’
 
-                /********************************** ÈË¹¤ÊÆ³¡·¨Æ«²î¼ÆËã ***********************************/
+                /********************************** äººå·¥åŠ¿åœºæ³•åå·®è®¡ç®— ***********************************/
 
-                // Ô´ÓÚÀ¶ÏßÔ¤ÃéµãµÄÒıµ¼Á¦£¬±£Ö¤³µºê¹ÛÉÏÊ¼ÖÕÑØ×ÅÈüµÀ¿ª
+                // æºäºè“çº¿é¢„ç„ç‚¹çš„å¼•å¯¼åŠ›ï¼Œä¿è¯è½¦å®è§‚ä¸Šå§‹ç»ˆæ²¿ç€èµ›é“å¼€
                 float base_dx = s_t_trackPoints_CV[aim_index_far].x - cx;
                 float base_dy = cy - s_t_trackPoints_CV[aim_index_far].y;
 
-                // ³õÊ¼»¯ºÏ³ÉÁ¦ÏòÁ¿ (³õÊ¼»¯Îª»ù´¡Â·¾¶ÒıÁ¦£¬»ù´¡ÒıÁ¦È¨ÖØÒşÊ½ÉèÎª1.0)
+                // åˆå§‹åŒ–åˆæˆåŠ›å‘é‡ (åˆå§‹åŒ–ä¸ºåŸºç¡€è·¯å¾„å¼•åŠ›ï¼ŒåŸºç¡€å¼•åŠ›æƒé‡éšå¼è®¾ä¸º1.0)
                 float Fx_total = base_dx * 1.0;
                 float Fy_total = base_dy * 1.0;
 
-                // --- APF ÊÆ³¡²ÎÊı ---
-                const float K_ATT_GOLD = 0.5f;     // ½ğ±ÒÒıÁ¦ÔöÒæ
-                const float K_REP_OBS = 120000.0f; // ÕÏ°­Îï³âÁ¦ÔöÒæ
-                const float REP_RADIUS = 280.0f;   // ³âÁ¦Ó°Ïì°ë¾¶
+                // --- APF åŠ¿åœºå‚æ•° ---
+                const float K_ATT_GOLD = 0.5f;     // é‡‘å¸å¼•åŠ›å¢ç›Š
+                const float K_REP_OBS = 120000.0f; // éšœç¢ç‰©æ–¥åŠ›å¢ç›Š
+                const float REP_RADIUS = 280.0f;   // æ–¥åŠ›å½±å“åŠå¾„
 
                 for (const auto &obj : predict_result)
                 {
@@ -302,21 +321,21 @@ TaskData Standard::run(const cv::Mat &src_img,
                     float dist = sqrt(dx_obj * dx_obj + dy_obj * dy_obj);
 
                     if (dist < 1e-2)
-                        continue; // ·ÀÖ¹³ıÁãÒì³£
+                        continue; // é˜²æ­¢é™¤é›¶å¼‚å¸¸
 
-                    // ½ğ±Ò¸½¼ÓÒıÁ¦
+                    // é‡‘å¸é™„åŠ å¼•åŠ›
                     if (obj.class_id == Standard::CLASS_ID_GOLD)
                     {
-                        // Ê¹ÓÃÏßĞÔÒıÁ¦Ä£ĞÍ
+                        // ä½¿ç”¨çº¿æ€§å¼•åŠ›æ¨¡å‹
                         Fx_total += K_ATT_GOLD * dx_obj;
                         Fy_total += K_ATT_GOLD * dy_obj;
                     }
-                    // ³µ¡¢ĞĞÈËÕÏ°­Îï³âÁ¦
+                    // è½¦ã€è¡Œäººéšœç¢ç‰©æ–¥åŠ›
                     else if (obj.class_id == Standard::CLASS_ID_CAR || obj.class_id == Standard::CLASS_ID_HUMAN)
                     {
                         if (dist < REP_RADIUS)
                         {
-                            // ³âÁ¦´óĞ¡¼ÆËãF = K * (1/d - 1/R) / d^2
+                            // æ–¥åŠ›å¤§å°è®¡ç®—F = K * (1/d - 1/R) / d^2
                             float rep_mag = K_REP_OBS * (1.0f / dist - 1.0f / REP_RADIUS) / (dist * dist);
 
                             Fx_total += rep_mag * (-dx_obj / dist);
@@ -325,15 +344,15 @@ TaskData Standard::run(const cv::Mat &src_img,
                     }
                 }
 
-                // ¶¯Á¦Ñ§Ó³Éä£ºÊ¹ÓÃ×ÜºÏ³ÉÁ¦¼ÆËã×îÖÕµÄ¿ØÖÆÆ«²î½Ç
+                // åŠ¨åŠ›å­¦æ˜ å°„ï¼šä½¿ç”¨æ€»åˆæˆåŠ›è®¡ç®—æœ€ç»ˆçš„æ§åˆ¶åå·®è§’
                 float error = -atan2f(Fx_total, Fy_total) * 180 / PI;
 
                 assert(!isnan(error));
                 printf("APF_Fx: %f, APF_Fy: %f\n", Fx_total, Fy_total);
                 printf("cx %f cy %f\n", cx, cy);
-                printf("error_far: %f degrees\n", error); // ´òÓ¡×îĞÂµÄÆ«²î½Ç
+                printf("error_far: %f degrees\n", error); // æ‰“å°æœ€æ–°çš„åå·®è§’
 
-                /***************************** »æÍ¼ ********************************/
+                /***************************** ç»˜å›¾ ********************************/
                 cv::Mat imgT;
 
                 if (_config.en_show || _config.saveImg)
@@ -341,7 +360,7 @@ TaskData Standard::run(const cv::Mat &src_img,
                     warpPerspective(src_img, imgT, general.rotation, src_img.size());
                     cv::putText(imgT, "error" + std::to_string(aim_angle_filter), Point(20, 20), cv::FONT_HERSHEY_SIMPLEX, 0.6, Scalar(0, 0, 255));
 
-                    // filtered_line_CV»æÍ¼
+                    // filtered_line_CVç»˜å›¾
                     for (size_t i = 0; i + 1 < trackPoints_CV.size(); ++i)
                     {
                         cv::circle(out_img, trackPoints_CV[i], 4, cv::Scalar(0, 255, 255), -1);
@@ -369,13 +388,13 @@ void updateSceneStatus(const aiget::PredictFrame &frame, Scene_status &scene_sta
 
     float confidence_threshold = (config != nullptr) ? config->confidence_threshold : 0.5f;
 
-    // ÖØÖÃËùÓĞ±êÖ¾
+    // é‡ç½®æ‰€æœ‰æ ‡å¿—
     scene_status.GoldScene = false;
     scene_status.CarScene = false;
     scene_status.HumanScene = false;
     scene_status.LightScene = false;
 
-    // ÁÙÊ± map ÓÃÓÚ´æ´¢Ã¿ÖÖ class_id µÄºòÑ¡¶ÔÏó£¨Ñ¡Ôñ y2 ×î´óµÄ£©
+    // ä¸´æ—¶ map ç”¨äºå­˜å‚¨æ¯ç§ class_id çš„å€™é€‰å¯¹è±¡ï¼ˆé€‰æ‹© y2 æœ€å¤§çš„ï¼‰
     std::map<int, aiget::PredictResult> candidates;
 
     for (const auto &obj : frame.objects)
@@ -383,12 +402,12 @@ void updateSceneStatus(const aiget::PredictFrame &frame, Scene_status &scene_sta
         if (obj.score > confidence_threshold)
         {
             int cid = obj.class_id;
-            // ¼ì²éÊÇ·ñÒÑÓĞºòÑ¡£¬»òµ±Ç°¶ÔÏóµÄ y2 ¸ü´ó
+            // æ£€æŸ¥æ˜¯å¦å·²æœ‰å€™é€‰ï¼Œæˆ–å½“å‰å¯¹è±¡çš„ y2 æ›´å¤§
             if (candidates.find(cid) == candidates.end() || obj.y2 > candidates[cid].y2)
             {
                 candidates[cid] = obj;
             }
-            // ¸üĞÂ Scene_status ±êÖ¾£¨Ô­ÓĞÂß¼­£©
+            // æ›´æ–° Scene_status æ ‡å¿—ï¼ˆåŸæœ‰é€»è¾‘ï¼‰
             switch (cid)
             {
             case Standard::CLASS_ID_GOLD:
@@ -409,7 +428,7 @@ void updateSceneStatus(const aiget::PredictFrame &frame, Scene_status &scene_sta
         }
     }
 
-    // Çå¿ÕÉÏÒ»Ö¡µÄÀúÊ·Êı¾İ
+    // æ¸…ç©ºä¸Šä¸€å¸§çš„æ•°æ®
     std_instance.gold_results_.clear();
     std_instance.car_results_.clear();
     std_instance.human_results_.clear();
@@ -418,7 +437,7 @@ void updateSceneStatus(const aiget::PredictFrame &frame, Scene_status &scene_sta
     t_gold_points.clear();
     t_human_points.clear();
 
-    // ½«Ñ¡ÖĞµÄºòÑ¡¶ÔÏóĞ´Èë¶ÔÓ¦È«¾ÖÊı×é
+    // å°†é€‰ä¸­çš„å€™é€‰å¯¹è±¡å†™å…¥å¯¹åº”å…¨å±€æ•°ç»„
     for (const auto &pair : candidates)
     {
         int cid = pair.first;
@@ -492,12 +511,12 @@ void Standard::trackRecognition(cv::Mat &imageGray, cv::Mat &imageBinary, cv::Ma
         trackPoints_AI = tracker.ExtractArrows(frame, mask);
     }
 
-    // ÖĞÏßÄâºÏ
+    // ä¸­çº¿æ‹Ÿåˆ
     filtered_line_CV = FitTrajectory_Poly((int)trackPoints_CV.size(), trackPoints_CV, frame);
 }
 
 /**
- * @brief µÈ¾à²ÉÑù
+ * @brief ç­‰è·é‡‡æ ·
  */
 void resample_points(const vector<POINT> &input, int input_size, vector<POINT> &output, int &output_size, float dist_threshold)
 {
@@ -543,7 +562,7 @@ void resample_points(const vector<POINT> &input, int input_size, vector<POINT> &
 }
 
 /**
- * @brief ¶¯Ì¬Ô¤Ãéµã¼ÆËã
+ * @brief åŠ¨æ€é¢„ç„ç‚¹è®¡ç®—
  */
 double Standard::DynamicAimDisCal()
 {
@@ -556,7 +575,7 @@ double Standard::DynamicAimDisCal()
     vector<double> t(d_s_t_trackPoints_CV.size());
     for (size_t i = 0; i < d_s_t_trackPoints_CV.size(); i++)
     {
-        t[i] = i; // ²ÎÊı»¯
+        t[i] = i; // å‚æ•°åŒ–
     }
     for (int i = 1; i < s_t_trackPoints_CV_size - 1; i++)
     {
@@ -564,7 +583,7 @@ double Standard::DynamicAimDisCal()
         sp.x = d_s_t_trackPoints_CV[i].x;
         sp.y = d_s_t_trackPoints_CV[i].y;
 
-        // Ê¹ÓÃÖĞĞÄ²î·Ö¼ÆËãÒ»½×µ¼Êı
+        // ä½¿ç”¨ä¸­å¿ƒå·®åˆ†è®¡ç®—ä¸€é˜¶å¯¼æ•°
         double dt1 = t[i] - t[i - 1];
         double dt2 = t[i + 1] - t[i];
 
@@ -575,11 +594,11 @@ double Standard::DynamicAimDisCal()
                  (d_s_t_trackPoints_CV[i + 1].y - d_s_t_trackPoints_CV[i].y) / dt2) /
                 2.0;
 
-        // ¼ÆËã¶ş½×µ¼Êı
+        // è®¡ç®—äºŒé˜¶å¯¼æ•°
         sp.ddx = (d_s_t_trackPoints_CV[i + 1].x - 2 * d_s_t_trackPoints_CV[i].x + d_s_t_trackPoints_CV[i - 1].x);
         sp.ddy = (d_s_t_trackPoints_CV[i + 1].y - 2 * d_s_t_trackPoints_CV[i].y + d_s_t_trackPoints_CV[i - 1].y);
 
-        // ¼ÆËãÇúÂÊ ¦Ê = |x'y'' - y'x''| / (x'? + y'?)^(3/2)
+        // è®¡ç®—æ›²ç‡ Îº = |x'y'' - y'x''| / (x'? + y'?)^(3/2)
         double numerator = abs(sp.dx * sp.ddy - sp.dy * sp.ddx);
         double denominator = pow(sp.dx * sp.dx + sp.dy * sp.dy, 1.5);
 
@@ -604,7 +623,7 @@ double Standard::DynamicAimDisCal()
         }
 
         double meanCurvature = sum / CurveEdge.size();
-        printf("×î´óÇúÂÊ %f n\n", maxCurvature);
+        printf("æœ€å¤§æ›²ç‡ %f n\n", maxCurvature);
     }
     return 0.0;
 }

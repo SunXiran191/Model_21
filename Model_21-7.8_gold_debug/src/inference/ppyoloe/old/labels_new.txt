@@ -1,0 +1,11 @@
+stop
+go
+guide_road
+guide_speed
+light_green
+light_red
+light_yellow
+zebraline
+gold
+human
+car

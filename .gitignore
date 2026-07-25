@@ -1,0 +1,12 @@
+
+# Build artifacts
+Model_21-7.8_gold_debug/build/
+Model_21-7.8_gold_debug/icar
+Model_21-7.8_gold_debug/tools/uart_dump
+
+# IDE
+.vscode/
+
+# Object files
+*.o
+*.o.d

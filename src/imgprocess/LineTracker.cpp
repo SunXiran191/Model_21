@@ -126,5 +126,5 @@ vector<Point> LineTracker::ExtractArrows_CV(const Mat &src, Mat &debug_mask)
 
 vector<Point> LineTracker::ExtractArrows_AI(const Mat &src, Mat &debug_mask)
 {
-
+    
 }
